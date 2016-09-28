@@ -63,14 +63,7 @@ int main (int argc, char** argv) {
 
     // Used to perform actions when keyboard keys are pressed
     ArKeyHandler keyHandler;
-    ArGlobalFunctor left(&turnLeft);
-    ArGlobalFunctor right(&turnRight);
-    ArGlobalFunctor up(&accelerate);
-    ArGlobalFunctor down(&decelerate);
-    keyHandler.addKeyHandler(ArKeyHandler::LEFT, &left);
-    keyHandler.addKeyHandler(ArKeyHandler::RIGHT, &right);
-    keyHandler.addKeyHandler(ArKeyHandler::UP, &up);
-    keyHandler.addKeyHandler(ArKeyHandler::DOWN, &down);
+
     Aria::setKeyHandler(&keyHandler);
 
     // ArRobot contains an exit action for the Escape key. It also
@@ -79,17 +72,21 @@ int main (int argc, char** argv) {
     robot.attachKeyHandler(&keyHandler);
     printf("You may press escape to exit\n");
 
-    // TODO: control the robot
+    ArGlobalFunctor left(&turnLeft);
+    ArGlobalFunctor right(&turnRight);
+    ArGlobalFunctor up(&accelerate);
+    ArGlobalFunctor down(&decelerate);
+    keyHandler.addKeyHandler(ArKeyHandler::LEFT, &left);
+    keyHandler.addKeyHandler(ArKeyHandler::RIGHT, &right);
+    keyHandler.addKeyHandler(ArKeyHandler::UP, &up);
+    keyHandler.addKeyHandler(ArKeyHandler::DOWN, &down);
 
     // Start of controling
 
     // 1. Lock the robot
     robot.lock();
-    //robot.setHeading (-90.0);
 
     // 2. Write your control code here,
-    //robot.setVel(150);
-
 
     // 3. Unlock the robot
     robot.unlock();
@@ -102,19 +99,23 @@ int main (int argc, char** argv) {
         robot.setRotVel (rotVel);
         breakVelocity (&vel);
         robot.setVel (vel);
-        bool problemsh = false;
+        bool stop = false;
         for (int s=0; s<robot.getNumSonar (); ++s) {
             ArSensorReading* asr = robot.getSonarReading (s);
+            double currentVelocity = robot.getVel ();
             double heading = asr->getSensorTh ();
-            if (asr->getRange () < 500) {
-                if (heading >= -90 && heading <= 90 && robot.getVel () > 0) {
-                    accSpeed = 0;
-                    robot.setVel (0);
-                    problemsh = true;
-                }
+            unsigned int range = asr->getRange ();
+            if (currentVelocity > 0 && (range < currentVelocity*2.5 || range < 500) && heading >= -90 && heading <= 90) {
+                accSpeed = 0;
+                robot.setVel (0);
+                stop = true;
+            } else if (currentVelocity < 0 && (range < -currentVelocity*2.5 || range < 500) && ((heading >= -180 && heading <= -90) || (heading >= 90 && heading <= 180))) {
+                accSpeed = 0;
+                robot.setVel (0);
+                stop = true;
             }
         }
-        if (!problemsh) {
+        if (!stop) {
             accSpeed = 200;
         }
     }
