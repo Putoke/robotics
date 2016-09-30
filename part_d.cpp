@@ -125,7 +125,6 @@ int main (int argc, char** argv) {
         robot.setRotVel (rotVel);
         breakVelocity (&vel);
         robot.setVel (vel);
-        //checkSonars();
     }
 
     // End of controling
