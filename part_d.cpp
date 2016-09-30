@@ -5,6 +5,8 @@ ArSonarDevice sonar;
 
 int rotVel, vel, accSpeed = 200, rotSpeed = 10;
 
+bool checkSonars(bool f);
+
 void turnLeft () {
     rotVel += rotSpeed;
     if (rotVel >= robot.getAbsoluteMaxRotVel ())
@@ -20,17 +22,21 @@ void turnRight () {
 }
 
 void accelerate () {
-    vel += accSpeed;
-    if (vel >= robot.getAbsoluteMaxTransVel ())
-        vel = robot.getAbsoluteMaxTransVel ();
-    robot.setVel(vel);
+    if (checkSonars (true)) {
+        vel += accSpeed;
+        if (vel >= robot.getAbsoluteMaxTransVel ())
+            vel = robot.getAbsoluteMaxTransVel ();
+        robot.setVel(vel);
+    }
 }
 
 void decelerate () {
-    vel -= accSpeed;
-    if (vel <= robot.getAbsoluteMaxTransNegVel ())
-        vel = robot.getAbsoluteMaxTransNegVel ();
-    robot.setVel(vel);
+    if (checkSonars (false)) {
+        vel -= accSpeed;
+        if (vel <= robot.getAbsoluteMaxTransNegVel ())
+            vel = robot.getAbsoluteMaxTransNegVel ();
+        robot.setVel(vel);
+    }
 }
 
 void breakVelocity (int* vel) {
@@ -40,6 +46,26 @@ void breakVelocity (int* vel) {
         *vel += 1;
     if (*vel <= -1 || *vel >= 1)
         *vel = 0;
+}
+
+bool checkSonars (bool forward) {
+    for (int s=0; s<robot.getNumSonar (); ++s) {
+        ArSensorReading* asr = robot.getSonarReading (s);
+        double currentVelocity = robot.getVel ();
+        double heading = asr->getSensorTh ();
+        unsigned int range = asr->getRange ();
+        if (forward && heading >= -45 && heading <= 45 && (range < currentVelocity*2.5 || range < 500)) {
+            vel = 0;
+            robot.setVel (0);
+            return false;
+        }
+        if (!forward && ((heading >= -180 && heading <= -135) || (heading >= 135 && heading <= 180)) && (range < -currentVelocity*2.5 || range < 500)) {
+            vel = 0;
+            robot.setVel (0);
+            return false;
+        }
+    }
+    return true;
 }
 
 
@@ -99,25 +125,7 @@ int main (int argc, char** argv) {
         robot.setRotVel (rotVel);
         breakVelocity (&vel);
         robot.setVel (vel);
-        bool stop = false;
-        for (int s=0; s<robot.getNumSonar (); ++s) {
-            ArSensorReading* asr = robot.getSonarReading (s);
-            double currentVelocity = robot.getVel ();
-            double heading = asr->getSensorTh ();
-            unsigned int range = asr->getRange ();
-            if (currentVelocity > 0 && (range < currentVelocity*2.5 || range < 500) && heading >= -90 && heading <= 90) {
-                accSpeed = 0;
-                robot.setVel (0);
-                stop = true;
-            } else if (currentVelocity < 0 && (range < -currentVelocity*2.5 || range < 500) && ((heading >= -180 && heading <= -90) || (heading >= 90 && heading <= 180))) {
-                accSpeed = 0;
-                robot.setVel (0);
-                stop = true;
-            }
-        }
-        if (!stop) {
-            accSpeed = 200;
-        }
+        //checkSonars();
     }
 
     // End of controling
