@@ -1,4 +1,4 @@
-all: part_d
+all: part_e
 
   CFLAGS=-fPIC -g -Wall
   ARIA_INCLUDE=-I/usr/local/Aria/include

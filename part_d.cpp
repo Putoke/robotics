@@ -106,6 +106,10 @@ int main (int argc, char** argv) {
     keyHandler.addKeyHandler(ArKeyHandler::RIGHT, &right);
     keyHandler.addKeyHandler(ArKeyHandler::UP, &up);
     keyHandler.addKeyHandler(ArKeyHandler::DOWN, &down);
+    keyHandler.addKeyHandler('a', &left);
+    keyHandler.addKeyHandler('d', &right);
+    keyHandler.addKeyHandler('w', &up);
+    keyHandler.addKeyHandler('s', &down);
 
     // Start of controling
 
