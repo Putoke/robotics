@@ -10,6 +10,8 @@ int main (int argc, char **argv) {
 
 	double x, y, th;
     cin >> x >> y >> th;
+	x *= 1000;
+	y *= 1000;
 
 	robot.addRangeDevice(&sonar);
 
