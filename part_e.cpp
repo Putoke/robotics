@@ -41,6 +41,8 @@ int main (int argc, char **argv) {
 	robot.lock();
 
 	double heading = atan(y/x);
+	if (x < 0)
+		heading += M_PI;
 	double distance = sqrt(pow(x, 2) + pow(y, 2));
 	bool started = false;
 
@@ -50,7 +52,6 @@ int main (int argc, char **argv) {
 	robot.unlock();
 
 	cout << robot.getX() << " " << robot.getY() << " " << robot.getTh() << endl;
-	double vel = distance/2 > 1000 ? 1000 : distance / 2;
 	// 4. Sleep a while and let the robot move
 	while (true) {
 		//printf("%f %f %f\n", robot.getX(), robot.getY(), robot.getTh());
