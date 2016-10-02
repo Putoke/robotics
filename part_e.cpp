@@ -1,6 +1,6 @@
 #include "Aria.h"
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 
@@ -63,16 +63,16 @@ int main (int argc, char **argv) {
 			started = true;
 		}
 		double travelled = robot.getTripOdometerDistance ();
-		if (started && travelled >= distance/4 && travelled <= distance/2) {
+		if (started && travelled >= distance/4 && travelled <= distance/3) {
 			robot.setVel (distance/4);
 		}
-		if (started && travelled >= distance/2 && travelled <= distance*0.9) {
+		if (started && travelled >= distance/2 && travelled <= distance*0.8) {
 			robot.setVel (distance/8);
 		}
-		if (started && travelled >= distance*0.9) {
+		if (started && travelled >= distance*0.8) {
 			robot.setVel (10);
 		}
-		if (started && travelled >= distance) {
+		if ((started && travelled >= distance) || (abs(robot.getX () - x) < 200 && abs(robot.getY () - y) < 200) ) {
 			robot.setVel (0);
 			break;
 		}
@@ -86,6 +86,7 @@ int main (int argc, char **argv) {
 
 	// End of controling
 
+	while (true) {}
 
 	Aria::shutdown();
 
