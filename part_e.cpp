@@ -50,7 +50,7 @@ int main (int argc, char **argv) {
 	robot.unlock();
 
 	cout << robot.getX() << " " << robot.getY() << " " << robot.getTh() << endl;
-
+	double vel = distance/2 > 1000 ? 1000 : distance / 2;
 	// 4. Sleep a while and let the robot move
 	while (true) {
 		//printf("%f %f %f\n", robot.getX(), robot.getY(), robot.getTh());
@@ -59,11 +59,22 @@ int main (int argc, char **argv) {
 			robot.setVel (distance/2);
 			started = true;
 		}
-		if (started && distance - robot.getTripOdometerDistance () < robot.getVel ()) {
+		double travelled = robot.getTripOdometerDistance ();
+		if (started && travelled >= distance/4 && travelled <= distance/2) {
+			robot.setVel (distance/4);
+		}
+		if (started && travelled >= distance/2 && travelled <= distance*0.9) {
+			robot.setVel (distance/8);
+		}
+		if (started && travelled >= distance*0.9) {
+			robot.setVel (10);
+		}
+		if (started && travelled >= distance) {
 			robot.setVel (0);
 			break;
 		}
 	}
+	while (robot.getVel () != 0) {}
 
 	robot.setHeading (th*180/M_PI);
 	while (!robot.isHeadingDone ()) {}
